@@ -26,8 +26,6 @@ public class Client {
     private InetAddress ip;
     private int PORT = 1234;
 
-    private String nomeClient;
-
     private boolean logout;
 
     public Client() {
@@ -43,9 +41,7 @@ public class Client {
             output = new DataOutputStream(socket.getOutputStream());
 
             scan = new Scanner(System.in);
-
-            // Inizializzo il nome del client
-            nomeClient = "user1";
+            
             // Inizializzo logout
             logout = false;
         } catch (UnknownHostException ex) {
@@ -80,8 +76,6 @@ public class Client {
                     try {
                         // Leggo il messaggio
                         String msg = input.readUTF();
-                        // IMPORTANTE
-                        // TO DO leggere il nome del client dal messaggio inviato dal server
                         System.out.println(msg);
                     } catch (IOException ex) {
                         // Output eccezione
@@ -113,8 +107,6 @@ public class Client {
 
                     try {
                         // Invia un messaggio e aggiunte il nome del client e # se non il server non funziona
-                        //output.writeUTF(nomeClient + "#" + msg);
-                        // es. user1#ciao
                         
                         // Invia messaggio (da aggiunte manualmente il nome del client e #)
                         output.writeUTF(msg);
