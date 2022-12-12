@@ -31,11 +31,11 @@ import java.util.StringTokenizer;
 
 public class Server {
 
-    private static String parola;
+    public static String parola;
 
     static String parolaAsteriscata = "";
+    public static final String parolaJolly= "jolly";
 
-    static int NTENTATIVI = 5;
     static int tentativiFatti = 0;
     static boolean finito = false;
 
@@ -78,7 +78,7 @@ public class Server {
         if (received.length() == parola.length()) {
             //converto la parola asteriscata in un array di caratteri così è più easy manipolarla dopo
             char[] parolaSvelata = parolaAsteriscata.toCharArray();
-            // log("parola: "+parola);
+            //log("parola: "+parola);
 
             //scorro tutta la stringa ricevuta
             for (int i = 0; i < received.length(); i++) {

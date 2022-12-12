@@ -9,6 +9,7 @@ public class ClientHandler implements Runnable {
 
     public static final String LOGOUT = "logout";
     public static final int PORT = 1234;
+   
 
     final Socket socket;
     final Scanner scan;
@@ -99,10 +100,20 @@ public class ClientHandler implements Runnable {
             if (c.isLosggedIn && c.name.equals(this.name)) {
                 if (c.tentativiFatti > 0) {
                     log(this.name + " ha provato con: " + received);
-                    parolaAsteriscata = Server.controllaCorrettezzaParola(received);
-                    c.vittoria = Server.controlloVittoria(parolaAsteriscata);
+                    if(Server.parolaJolly.equals(received.trim()))
+                    {
+                        parolaAsteriscata = Server.parola;
+                        parolaAsteriscata = parolaAsteriscata+"_jolly";
+                        log("Il client ha inserito la parola jolly");
+                    }
+                    else
+                    {
+                        parolaAsteriscata = Server.controllaCorrettezzaParola(received);
+                        c.vittoria = Server.controlloVittoria(parolaAsteriscata);
+                    }
+                    
                     log("vittoria:  " + c.vittoria);
-                    if (c.vittoria == true || c.tentativiFatti >= Server.NTENTATIVI) {
+                    if (c.vittoria == true) {
                         Server.finito = true;
                         write(c.output, "logout");
                         log(this.name + " ha vinto!");

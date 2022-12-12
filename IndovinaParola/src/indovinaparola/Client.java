@@ -81,7 +81,7 @@ public class Client {
                     try {
                         // Leggo il messaggio
                         String msg = input.readUTF();
-
+                        //System.out.println("Sono il client msg: "+msg);
                         // Se il server disconnette per vittoria
                         if (msg.trim().equals("logout")) {
                             logout = true;
@@ -92,7 +92,19 @@ public class Client {
                                 System.out.println(msg);
                                 primoMess++;
                             } else {
-                                System.out.println("Stato parola: " + msg);
+                                //System.out.println("msg: "+msg);
+                                if(!msg.contains("jolly"))
+                                {
+                                     System.out.println("Stato parola: " + msg);
+                                }
+                                else
+                                {
+                                    msg = msg.replace("_jolly","");
+                                    System.out.println("La soluzione è: "+msg);
+                                    //quando il client riceve la soluzione viene atomaticamente disconnesso
+                                    msg = "logout";
+                                }
+                               
                             }
                         }
                         
