@@ -72,9 +72,7 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         String received;
-        write(output, "Benvenuto " + name + " scrivi \"Pronto\" per ricevere la parola.");
-
-        Server.inserisciParolaDaIndovinare();
+        write(output, "Benvenuto " + name + ".");
 
         while (Server.finito == false) {//se il server è attivo
             // log("giocoFinito(): "+Server.giocoFinito());
@@ -91,7 +89,7 @@ public class ClientHandler implements Runnable {
             forwardToClient(received, Server.parolaAsteriscata);
 
         }
-        closeStreams();
+        //closeStreams();
     }
 
     private void forwardToClient(String received, String parolaAsteriscata) {
@@ -113,15 +111,15 @@ public class ClientHandler implements Runnable {
                         c.vittoria = Server.controlloVittoria(parolaAsteriscata);
                     }
 
-                    log("vittoria:  " + c.vittoria);
                     if (c.vittoria == true) {
                         Server.finito = true;
+                        isLosggedIn=false;
                         write(c.output, "logout");
                         log(this.name + " ha vinto!");
                         break;
                     }
                 }
-                write(c.output, parolaAsteriscata);
+                write(c.output, name + ":" + parolaAsteriscata);
 
                 log(name + " --> " + parolaAsteriscata);
                 //log("tentativiFatti: "+c.tentativiFatti);
@@ -138,6 +136,7 @@ public class ClientHandler implements Runnable {
             line = input.readUTF();
         } catch (IOException ex) {
             log("read : " + ex.getMessage());
+            Server.finito = true;
         }
         return line;
     }
@@ -147,6 +146,7 @@ public class ClientHandler implements Runnable {
             output.writeUTF(message);
         } catch (IOException ex) {
             log("write : " + ex.getMessage());
+            Server.finito = true;
         }
     }
 

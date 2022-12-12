@@ -134,6 +134,8 @@ public class Server {
     private void waitConnection() {
         log("Server Running...");
 
+        Server.inserisciParolaDaIndovinare();
+        
         while (Server.finito == false) {
             try {
                 socket = serverSocket.accept();
