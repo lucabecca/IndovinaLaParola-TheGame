@@ -1,23 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package indovinaparola;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+public class ClientHandler implements Runnable {
 
-
-
-public class ClientHandler implements Runnable{
-    
     public static final String LOGOUT = "logout";
     public static final int PORT = 1234;
 
@@ -25,9 +14,9 @@ public class ClientHandler implements Runnable{
     final Scanner scan;
     String name;
     boolean isLosggedIn;
-    
-    
-    
+    int tentativiFatti = 0;
+    boolean vittoria;
+
     private DataInputStream input;
     private DataOutputStream output;
 
@@ -62,60 +51,76 @@ public class ClientHandler implements Runnable{
     public void setOutput(DataOutputStream output) {
         this.output = output;
     }
-    
-    
-    
-    
-    public ClientHandler(Socket socket, String name){
+
+    public ClientHandler(Socket socket, String name) {
         this.socket = socket;
         scan = new Scanner(System.in);
         this.name = name;
         isLosggedIn = true;
-        
-        try{
+        vittoria = false;
+
+        try {
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
-            
-        }catch(IOException ex){
+
+        } catch (IOException ex) {
             log("ClientHander : " + ex.getMessage());
         }
     }
+
     @Override
     public void run() {
         String received;
-        write(output, "Your name : " + name);
-        
-        while(true){
+        write(output, "Benvenuto " + name + " scrivi \"Pronto\" per ricevere la parola.");
+
+        Server.inserisciParolaDaIndovinare();
+
+        while (Server.finito == false) {
+            // log("giocoFinito(): "+Server.giocoFinito());
+
             received = read();
-            if(received.equalsIgnoreCase(LOGOUT)){
+            if (received.equalsIgnoreCase(LOGOUT)) {
                 this.isLosggedIn = false;
                 closeSocket();
                 closeStreams();
                 break;
             }
-            
-            forwardToClient(received);
+
+            forwardToClient(received, Server.parolaAsteriscata);
+
         }
         closeStreams();
     }
-    
-    private void forwardToClient(String received){
-        // username # message
-        StringTokenizer tokenizer = new StringTokenizer(received, "#");
-        String recipient = tokenizer.nextToken().trim();
-        String message = tokenizer.nextToken().trim();
-        
-        for(ClientHandler c : Server.getClients()){
-            if(c.isLosggedIn && c.name.equals(recipient)){
-                write(c.output,  recipient + " : " + message);
-                log(name + " --> " + recipient + " : " + message);
+
+    private void forwardToClient(String received, String parolaAsteriscata) {
+        //log("recipient: "+recipient+" message: "+message);
+
+        for (ClientHandler c : Server.getClients()) {
+            if (c.isLosggedIn && c.name.equals(this.name)) {
+                if (c.tentativiFatti > 0) {
+                    log(this.name + " ha provato con: " + received);
+                    parolaAsteriscata = Server.controllaCorrettezzaParola(received);
+                    c.vittoria = Server.controlloVittoria(parolaAsteriscata);
+                    log("vittoria:  " + c.vittoria);
+                    if (c.vittoria == true || c.tentativiFatti >= Server.NTENTATIVI) {
+                        Server.finito = true;
+                        write(c.output, "logout");
+                        log(this.name + " ha vinto!");
+                        break;
+                    }
+                }
+                write(c.output, parolaAsteriscata);
+
+                log(name + " --> " + parolaAsteriscata);
+                //log("tentativiFatti: "+c.tentativiFatti);
+                c.tentativiFatti++;
                 break;
+
             }
         }
-        
     }
-    
-    private String read(){
+
+    private String read() {
         String line = "";
         try {
             line = input.readUTF();
@@ -124,15 +129,15 @@ public class ClientHandler implements Runnable{
         }
         return line;
     }
-    
-    private void write(DataOutputStream output , String message){
+
+    private void write(DataOutputStream output, String message) {
         try {
             output.writeUTF(message);
         } catch (IOException ex) {
             log("write : " + ex.getMessage());
         }
     }
-    
+
     private void closeStreams() {
         try {
             this.input.close();
@@ -141,16 +146,17 @@ public class ClientHandler implements Runnable{
             log("closeStreams : " + ex.getMessage());
         }
     }
-  
-    private void closeSocket(){
-        try{
+
+    private void closeSocket() {
+        try {
             socket.close();
-        }catch(IOException ex){
+        } catch (IOException ex) {
             log("closeSocket : " + ex.getMessage());
         }
     }
-   
-    private void log(String msg){
+
+    private void log(String msg) {
         System.out.println(msg);
     }
+
 }
