@@ -18,18 +18,18 @@ import javax.swing.SwingUtilities;
  * @author becca
  */
 public class Client {
-    
+
     private Scanner scan;
     private Socket socket = null;
     private DataInputStream input = null;
     private DataOutputStream output = null;
     private InetAddress ip;
     private int PORT = 1234;
-    
+
     private boolean logout;
-    
+
     private int primoMess;
-    
+
     public Client() {
         try {
             // TO DO Lo chiederà all'avvio
@@ -41,12 +41,12 @@ public class Client {
             input = new DataInputStream(socket.getInputStream());
             // Per inviare i dati
             output = new DataOutputStream(socket.getOutputStream());
-            
+
             scan = new Scanner(System.in);
 
             // Inizializzo logout
             logout = false;
-            
+
             primoMess = 0;
         } catch (UnknownHostException ex) {
             // Output eccezione
@@ -55,11 +55,11 @@ public class Client {
             // Output eccezione
             System.out.println("Client : " + ex.getMessage());
         }
-        
+
     }
-    
+
     public static void main(String[] args) {
-        
+
         Client client = new Client();
         // Avvio il Thread per la recezione dei messaggi
         client.readMessageThread();
@@ -69,11 +69,11 @@ public class Client {
         // Grafica
         openJFrames();
     }
-    
+
     private void readMessageThread() {
         // Creo il Thread
         Thread readMessage = new Thread(new Runnable() {
-            
+
             @Override
             public void run() {
                 // Ciclo infinito
@@ -93,36 +93,33 @@ public class Client {
                                 primoMess++;
                             } else {
                                 //System.out.println("msg: "+msg);
-                                if(!msg.contains("jolly"))
-                                {
-                                     System.out.println("Stato parola: " + msg);
-                                }
-                                else
-                                {
-                                    msg = msg.replace("_jolly","");
-                                    System.out.println("La soluzione è: "+msg);
+                                if (!msg.contains("jolly")) {
+                                    System.out.println("Stato parola: " + msg);
+                                } else {
+                                    msg = msg.replace("_jolly", "");
+                                    System.out.println("La soluzione è: " + msg);
                                     //quando il client riceve la soluzione viene atomaticamente disconnesso
                                     msg = "logout";
                                 }
-                               
+
                             }
                         }
-                        
+
                     } catch (IOException ex) {
                         // Output eccezione
                         System.out.println("readMessageThread : " + ex.getMessage());
                     }
-                    
+
                 }
             }
         });
         // Avvio il Thread
         readMessage.start();
     }
-    
+
     private void writeMessageThread() {
         Thread sendMessage = new Thread(new Runnable() {
-            
+
             @Override
             public void run() {
                 System.out.println("Inserire \"logout\" per disconnettersi.");
@@ -137,7 +134,7 @@ public class Client {
                     if (msg.trim().equals("logout")) {
                         logout = true;
                     }
-                    
+
                     try {
                         // Invia messaggio
                         output.writeUTF(msg);
@@ -151,7 +148,7 @@ public class Client {
         // Avvio il Thread
         sendMessage.start();
     }
-    
+
     private static void openJFrames() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

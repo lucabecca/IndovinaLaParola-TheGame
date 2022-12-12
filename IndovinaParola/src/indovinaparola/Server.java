@@ -20,21 +20,25 @@ allora visualizzo "c**a"
  */
 package indovinaparola;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
-import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Server {
 
     public static String parola;
 
     static String parolaAsteriscata = "";
-    public static final String parolaJolly= "jolly";
+    public static final String parolaJolly = "jolly";
 
     static int tentativiFatti = 0;
     static boolean finito = false;
@@ -43,7 +47,6 @@ public class Server {
 
     static boolean controlloVittoria(String parolaAsteriscata) {
         //se la parola asteriscata non contiene più nessun asterisco significa che è stata scoperta
-
         if (parolaAsteriscata.contains("*")) {
             finito = false;
             return false;
@@ -99,14 +102,33 @@ public class Server {
     static void inserisciParolaDaIndovinare() {
 
         Scanner scan = new Scanner(System.in);
-        System.out.println("Inserisci la parola da indovinare: ");
-        parola = scan.nextLine();
+        System.out.println("La parola verrà estratta random da un file...");
 
+        File myObj = new File("660000_parole_italiane.txt");
+        Scanner myReader = null;
+        try {
+            myReader = new Scanner(myObj);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //estraggo un numero a caso tra 1 e 661563
+        Random random = new Random();
+        int min = 1;
+        int max = 661563;
+        int randomNumber = random.nextInt(max + 1 - min) + min;
+        System.out.println("Voglio estrarre la parola numero: " + randomNumber);
+        String data = null;
+        for (int cont = 1; cont <= randomNumber; cont++) {
+            data = myReader.nextLine();
+
+        }
+        System.out.println(data);
+        parola = data;
+        myReader.close();
         //una volta generata la parola invio un msg al client con *** che hanno la stessa lunghezza della parola
         for (int i = 0; i < parola.length(); i++) {
             parolaAsteriscata = parolaAsteriscata + "*";
         }
-
     }
 
     private void waitConnection() {

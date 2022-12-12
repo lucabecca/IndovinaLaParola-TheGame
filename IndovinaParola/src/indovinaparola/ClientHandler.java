@@ -3,13 +3,11 @@ package indovinaparola;
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
-import java.util.StringTokenizer;
 
 public class ClientHandler implements Runnable {
 
     public static final String LOGOUT = "logout";
     public static final int PORT = 1234;
-   
 
     final Socket socket;
     final Scanner scan;
@@ -53,14 +51,16 @@ public class ClientHandler implements Runnable {
         this.output = output;
     }
 
-    public ClientHandler(Socket socket, String name) {
-        this.socket = socket;
+    public ClientHandler(Socket socket, String name) {//costruttore
+        this.socket = socket;//collegamento col server
         scan = new Scanner(System.in);
         this.name = name;
-        isLosggedIn = true;
+        isLosggedIn = true;//dopo aver creato il nome diventa true
         vittoria = false;
 
         try {
+            //grazie alla socket(collegamento)il client puo scambiare un input
+            //e output con il server
             input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
 
@@ -76,17 +76,18 @@ public class ClientHandler implements Runnable {
 
         Server.inserisciParolaDaIndovinare();
 
-        while (Server.finito == false) {
+        while (Server.finito == false) {//se il server è attivo
             // log("giocoFinito(): "+Server.giocoFinito());
 
-            received = read();
-            if (received.equalsIgnoreCase(LOGOUT)) {
+            received = read(); //il server riceve un messaggio dal client
+            if (received.equalsIgnoreCase(LOGOUT)) {//per uscire e "interrompere"
                 this.isLosggedIn = false;
                 closeSocket();
                 closeStreams();
                 break;
             }
 
+            //invia al client
             forwardToClient(received, Server.parolaAsteriscata);
 
         }
@@ -100,18 +101,18 @@ public class ClientHandler implements Runnable {
             if (c.isLosggedIn && c.name.equals(this.name)) {
                 if (c.tentativiFatti > 0) {
                     log(this.name + " ha provato con: " + received);
-                    if(Server.parolaJolly.equals(received.trim()))
-                    {
-                        parolaAsteriscata = Server.parola;
-                        parolaAsteriscata = parolaAsteriscata+"_jolly";
+                    if (Server.parolaJolly.equals(received.trim())) {//se ricevo jolly
+                        parolaAsteriscata = Server.parola;//da la soluzione
+                        parolaAsteriscata = parolaAsteriscata + "_jolly";
                         log("Il client ha inserito la parola jolly");
-                    }
-                    else
-                    {
+                    } else {
+                        //controlla se il client ha scritto delle lettere corrette
+                        //e visualizza le lettere azzeccate
                         parolaAsteriscata = Server.controllaCorrettezzaParola(received);
+                        //richiama il metodo che controlla gli asterischi, se non ci sono la parola è indovinata
                         c.vittoria = Server.controlloVittoria(parolaAsteriscata);
                     }
-                    
+
                     log("vittoria:  " + c.vittoria);
                     if (c.vittoria == true) {
                         Server.finito = true;
@@ -131,7 +132,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private String read() {
+    private String read() {//legge l'input da inviare
         String line = "";
         try {
             line = input.readUTF();
@@ -141,7 +142,7 @@ public class ClientHandler implements Runnable {
         return line;
     }
 
-    private void write(DataOutputStream output, String message) {
+    private void write(DataOutputStream output, String message) {//scrive l'output ricevuto
         try {
             output.writeUTF(message);
         } catch (IOException ex) {
@@ -149,7 +150,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    private void closeStreams() {
+    private void closeStreams() {//chiude lo Streams l'input e Streams l'output
         try {
             this.input.close();
             this.output.close();
