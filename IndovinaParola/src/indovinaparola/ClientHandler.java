@@ -74,7 +74,7 @@ public class ClientHandler implements Runnable {
         String received;
         write(output, "Benvenuto " + name + ".");
 
-        while (Server.finito == false) {//se il server è attivo
+        while (isLosggedIn == true) {//se il server è attivo
             // log("giocoFinito(): "+Server.giocoFinito());
 
             received = read(); //il server riceve un messaggio dal client
@@ -136,7 +136,7 @@ public class ClientHandler implements Runnable {
             line = input.readUTF();
         } catch (IOException ex) {
             log("read : " + ex.getMessage());
-            Server.finito = true;
+            isLosggedIn=false;
         }
         return line;
     }
@@ -146,7 +146,7 @@ public class ClientHandler implements Runnable {
             output.writeUTF(message);
         } catch (IOException ex) {
             log("write : " + ex.getMessage());
-            Server.finito = true;
+            isLosggedIn=false;
         }
     }
 
